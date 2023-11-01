@@ -15,7 +15,6 @@ const Navbar = () => {
   ];
 
   const currentpath = usePathname();
-  console.log(currentpath);
 
   return (
     <nav className="flex space-x-6 px-6 border-b h-16 items-center">
