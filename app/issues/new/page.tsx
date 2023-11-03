@@ -4,6 +4,7 @@ import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
+import axios from "axios";
 
 interface Issue {
   title: string;
@@ -16,7 +17,9 @@ const NewIssuePage = () => {
     <div className="max-w-xl">
       <form
         className="space-y-4"
-        onSubmit={handleSubmit((data) => console.log(data))}
+        onSubmit={handleSubmit(async (data) => {
+          await axios.post("/api/issues", data);
+        })}
       >
         <TextField.Root>
           <TextFieldInput placeholder="Title" {...register("title")} />
@@ -24,7 +27,9 @@ const NewIssuePage = () => {
         <Controller
           name="description"
           control={control}
-          render={({field}) => <SimpleMDE placeholder="Description" {...field} />}
+          render={({ field }) => (
+            <SimpleMDE placeholder="Description" {...field} />
+          )}
         />
         <Button>Submit new Issue</Button>
       </form>
