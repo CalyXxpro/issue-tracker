@@ -26,7 +26,7 @@ const IssueForm = ({ issue }: { issue?: Issue }) => {
   const router = useRouter();
   const [error, setError] = useState<string>("");
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
-  const onSubmit = handleSubmit(async (data) => {
+  const submitIssue = handleSubmit(async (data) => {
     try {
       setSubmitting(true);
       if (issue) {
@@ -49,7 +49,7 @@ const IssueForm = ({ issue }: { issue?: Issue }) => {
           <Callout.Text>{error}</Callout.Text>
         </Callout.Root>
       )}
-      <form className="space-y-4" onSubmit={onSubmit}>
+      <form className="space-y-4" onSubmit={submitIssue}>
         <TextField.Root>
           <TextFieldInput
             defaultValue={issue?.title}
