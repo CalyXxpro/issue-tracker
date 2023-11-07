@@ -2,8 +2,12 @@ import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import prisma from "@/prisma/client";
 import { IssueSchema } from "@/app/Validationschemas";
+import { AuthOptions } from "@/app/auth/AuthOptions";
+import { getServerSession } from "next-auth";
 
 export async function PATCH(request: NextRequest, {params} : {params: {id : string}}) {
+    const session = getServerSession(AuthOptions);
+    if(!session) return NextResponse.json({}, {status: 401});
     const body = await request.json();
     const validated =  IssueSchema.safeParse(body);
     if(!validated.success) return NextResponse.json(validated.error.format(), {status : 400});
@@ -19,6 +23,8 @@ export async function PATCH(request: NextRequest, {params} : {params: {id : stri
 }
 
 export async function DELETE(request: NextRequest, {params} : {params: {id : string}}) {
+    const session = getServerSession(AuthOptions);
+    if(!session) return NextResponse.json({}, {status: 401});
     const issue = await prisma.issue.findUnique({where: {id: parseInt(params.id)}});
     if(!issue) return NextResponse.json("Invalid Issue", {status: 404});
 
