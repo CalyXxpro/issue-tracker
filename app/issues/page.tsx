@@ -1,40 +1,22 @@
 import prisma from "@/prisma/client";
-import { Table } from "@radix-ui/themes";
-import IssueActions from "./IssueActions";
-import { IssueStatusBadge, Link } from "../components";
-import { Issue, Status } from "@prisma/client";
-import NextLink from "next/link";
-import { ArrowUpIcon } from "@radix-ui/react-icons";
+import { Status } from "@prisma/client";
 import Pagination from "../components/Pagination";
+import IssueActions from "./IssueActions";
+import IssuesTable, { IssueQuery, columnNames } from "./IssuesTable";
+import { Flex } from "@radix-ui/themes";
 
-const IssuesPage = async ({
-  searchParams,
-}: {
-  searchParams: { status: Status; orderBy: keyof Issue; page: string };
-}) => {
+interface Props {
+  searchParams: IssueQuery;
+}
+
+const IssuesPage = async ({ searchParams }: Props) => {
   const statuses = Object.values(Status);
   const status = statuses.includes(searchParams.status)
     ? searchParams.status
     : undefined;
   const where = { status };
 
-  const columns: {
-    label: string;
-    value: keyof Issue;
-    className: string | undefined;
-  }[] = [
-    { label: "Issue", value: "title", className: undefined },
-    { label: "Status", value: "status", className: "hidden md:table-cell" },
-    {
-      label: "Created At",
-      value: "createdAt",
-      className: "hidden md:table-cell",
-    },
-  ];
-
-  const orderBy = columns
-    .map((column) => column.value)
-    .includes(searchParams.orderBy)
+  const orderBy = columnNames.includes(searchParams.orderBy)
     ? {
         [searchParams.orderBy]: "asc",
       }
@@ -53,53 +35,17 @@ const IssuesPage = async ({
   const itemCount = await prisma.issue.count({ where });
 
   return (
-    <div>
+    <Flex direction="column" gap="5">
       <IssueActions />
-      <Table.Root variant="surface">
-        <Table.Header>
-          <Table.Row>
-            {columns.map((column) => (
-              <Table.ColumnHeaderCell
-                key={column.value}
-                className={column.className}
-              >
-                <NextLink
-                  href={{ query: { ...searchParams, orderBy: column.value } }}
-                >
-                  {column.label}
-                  {searchParams.orderBy === column.value && (
-                    <ArrowUpIcon className="inline" />
-                  )}
-                </NextLink>
-              </Table.ColumnHeaderCell>
-            ))}
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {issues.map((issue) => (
-            <Table.Row key={issue.id}>
-              <Table.Cell>
-                <Link href={`/issues/${issue.id}`}>{issue.title}</Link>
-                <div className="block md:hidden">
-                  <IssueStatusBadge status={issue.status} />
-                </div>
-              </Table.Cell>
-              <Table.Cell className="hidden md:table-cell">
-                <IssueStatusBadge status={issue.status} />
-              </Table.Cell>
-              <Table.Cell className="hidden md:table-cell">
-                {issue.createdAt.toDateString()}
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
-      <Pagination
-        itemCount={itemCount}
-        pageSize={pageSize}
-        currentPage={page}
-      />
-    </div>
+      <IssuesTable issues={issues} searchParams={searchParams} />
+      <Flex justify="center">
+        <Pagination
+          itemCount={itemCount}
+          pageSize={pageSize}
+          currentPage={page}
+        />
+      </Flex>
+    </Flex>
   );
 };
 
